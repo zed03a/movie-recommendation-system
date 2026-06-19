@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CineMatch - AI Movie & Web Series Recommendation System. Find movies, web series, Bollywood, Hollywood, and search by director.">
+    <title>CineMatch - Movies & Web Series Recommender</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="#" class="logo" id="logo-link">
+                <i class="fa-solid fa-compact-disc LogoSpin"></i>
+                <span>CineMatch<span class="logo-dot">.</span></span>
+            </a>
+            
+            <nav class="nav-links" id="main-nav-links">
+                <a href="#trending-section" class="active-nav">Home</a>
+                <a href="#bollywood-section">🇮🇳 India</a>
+                <a href="#hollywood-section">🎬 Hollywood</a>
+                <a href="#webseries-section">📺 Web Series</a>
+                <a href="#scifi-section">Sci-Fi</a>
+                <a href="#action-section">Action</a>
+                <a href="#watchlist-section">Watchlist</a>
+            </nav>
+            
+            <!-- Search Widget in Navbar -->
+            <div class="search-widget" id="search-widget-container">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="movie-search-input" placeholder="Movie, series, or director..." autocomplete="off">
+                    <button id="clear-search-btn" class="clear-btn" style="display: none;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <!-- Autocomplete Dropdown List -->
+                <div class="autocomplete-dropdown" id="autocomplete-list" style="display: none;"></div>
+            </div>
+
+            <!-- Director Search Button -->
+            <button class="btn btn-director-search" id="director-search-btn" title="Search by Director">
+                <i class="fa-solid fa-user-tie"></i> Director
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Banner (Dynamic featured movie) -->
+    <section class="hero-section" id="hero-banner">
+        <div class="hero-backdrop" id="hero-backdrop-img"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-badge-container">
+                <span class="hero-badge"><i class="fa-solid fa-fire-flame-curved"></i> Spotlight</span>
+                <span class="hero-lang-badge" id="hero-lang-badge">Hollywood</span>
+            </div>
+            <h1 class="hero-title" id="hero-movie-title">Interstellar</h1>
+            <div class="hero-meta">
+                <span id="hero-movie-year">2014</span>
+                <span class="meta-divider">•</span>
+                <span id="hero-movie-runtime">169 min</span>
+                <span class="meta-divider">•</span>
+                <span class="rating-tag"><i class="fa-solid fa-star"></i> <span id="hero-movie-rating">8.6</span></span>
+                <span class="meta-divider">•</span>
+                <span class="hero-lang-tag" id="hero-movie-lang">English</span>
+            </div>
+            <p class="hero-overview" id="hero-movie-overview">
+                The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" id="hero-recommend-btn">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Recommendations
+                </button>
+                <button class="btn btn-secondary" id="hero-watchlist-btn">
+                    <i class="fa-regular fa-bookmark"></i> Add to Watchlist
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <main class="main-layout">
+        
+        <!-- Director Search Results (Hidden until searched) -->
+        <section class="movie-row-container" id="director-results-section" style="display: none;">
+            <div class="row-header">
+                <h2 class="row-title" id="director-results-heading">
+                    <i class="fa-solid fa-user-tie" style="color: var(--accent-purple);"></i>
+                    <span id="director-results-name">Director</span> — Filmography
+                </h2>
+                <p class="row-subtitle" id="director-results-count">Loading movies by this director...</p>
+            </div>
+            <div class="row-scroll-wrapper">
+                <div class="row-scroll-container" id="director-results-grid"></div>
+            </div>
+        </section>
+
+        <!-- Recommendations Row (Dynamic - Hidden until search) -->
+        <section class="movie-row-container" id="recommendations-section" style="display: none;">
+            <div class="row-header">
+                <h2 class="row-title" id="results-heading">Recommended for You</h2>
+                <p class="row-subtitle" id="results-subheading">Similar movies calculated using content similarity indices.</p>
+            </div>
+            
+            <!-- Shimmer / Skeleton Loader -->
+            <div class="row-scroll-wrapper" id="recommendations-loader" style="display: none;">
+                <div class="row-scroll-container">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+            </div>
+            
+            <!-- Horizontal Carousel Row -->
+            <div class="row-scroll-wrapper">
+                <div class="row-scroll-container" id="recommendations-grid">
+                    <!-- Recommended cards injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Trending Hits Row -->
+        <section class="movie-row-container" id="trending-section">
+            <div class="row-header">
+                <h2 class="row-title"><i class="fa-solid fa-fire" style="color: #ff6b35;"></i> Trending Hits</h2>
+                <p class="row-subtitle">Most popular films in global streaming databases.</p>
+            </div>
+            <div class="row-scroll-wrapper">
+                <div class="row-scroll-container" id="trending-grid">
+                    <div class="shimmer-row">
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🇮🇳 Bollywood / Indian Cinema Row -->
+        <section class="movie-row-container" id="bollywood-section">
+            <div class="row-header">
+                <div class="lang-section-header">
+                    <div class="lang-flag-badge india-badge">
+                        <span class="flag-emoji">🇮🇳</span>
+                        <span class="lang-title">Indian Cinema</span>
+                        <span class="lang-subtitle-badge">Bollywood · Tollywood · Kollywood</span>
+                    </div>
+                    <div class="lang-available-tags">
+                        <span class="lang-tag">Hindi</span>
+                        <span class="lang-tag">Tamil</span>
+                        <span class="lang-tag">Telugu</span>
+                        <span class="lang-tag">Malayalam</span>
+                        <span class="lang-tag">Marathi</span>
+                        <span class="lang-tag">Bengali</span>
+                        <span class="lang-tag">Punjabi</span>
+                        <span class="lang-tag">Kannada</span>
+                    </div>
+                </div>
+                <p class="row-subtitle">Iconic films from India's diverse regional & Bollywood industries.</p>
+            </div>
+            <div class="row-scroll-wrapper">
+                <div class="row-scroll-container" id="bollywood-grid">
+                    <div class="shimmer-row">
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🎬 Hollywood Row -->
+        <section class="movie-row-container" id="hollywood-section">
+            <div class="row-header">
+                <div class="lang-section-header">
+                    <div class="lang-flag-badge hollywood-badge">
+                        <span class="flag-emoji">🎬</span>
+                        <span class="lang-title">Hollywood</span>
+                        <span class="lang-subtitle-badge">English · International</span>
+                    </div>
+                    <div class="lang-available-tags">
+                        <span class="lang-tag">English</span>
+                        <span class="lang-tag">French</span>
+                        <span class="lang-tag">German</span>
+                        <span class="lang-tag">Spanish</span>
+                        <span class="lang-tag">Italian</span>
+                        <span class="lang-tag">Japanese</span>
+                        <span class="lang-tag">Korean</span>
+                    </div>
+                </div>
+                <p class="row-subtitle">Top global box office hits from Hollywood studios worldwide.</p>
+            </div>
+            <div class="row-scroll-wrapper">
+                <div class="row-scroll-container" id="hollywood-grid">
+                    <div class="shimmer-row">
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 📺 Web Series Section -->
+        <section class="movie-row-container" id="webseries-section">
+            <div class="row-header">
+                <div class="lang-section-header">
+                    <div class="lang-flag-badge webseries-badge">
+                        <span class="flag-emoji">📺</span>
+                        <span class="lang-title">Web Series & TV Shows</span>
+                        <span class="lang-subtitle-badge">Netflix · Prime · Disney+ · Hotstar</span>
+                    </div>
+                    <div class="lang-available-tags">
+                        <span class="lang-tag">Drama</span>
+                        <span class="lang-tag">Thriller</span>
+                        <span class="lang-tag">Comedy</span>
+                        <span class="lang-tag">Crime</span>
+                        <span class="lang-tag">Sci-Fi</span>
+                        <span class="lang-tag">Fantasy</span>
+                        <span class="lang-tag">Documentary</span>
+                    </div>
+                </div>
+                <p class="row-subtitle">Binge-worthy series with seasons, episodes & premiere dates.</p>
+            </div>
+            <!-- Featured Web Series Cards (with Season/Episode info) -->
+            <div class="webseries-featured-grid" id="webseries-featured-grid">
+                <!-- Injected by JS -->
+            </div>
+            <div class="row-scroll-wrapper" style="margin-top: 1.5rem;">
+                <div class="row-scroll-container" id="webseries-grid">
+                    <div class="shimmer-row">
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div><div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sci-Fi Hits Row -->
+        <section class="movie-row-container" id="scifi-section">
+            <div class="row-header">
+                <h2 class="row-title"><i class="fa-solid fa-rocket" style="color: #00e5ff;"></i> Sci-Fi & Cosmos</h2>
+                <p class="row-subtitle">Embark on journeys across space, time, and advanced realities.</p>
+            </div>
+            <div class="row-scroll-wrapper">
+                <div class="row-scroll-container" id="scifi-grid"></div>
+            </div>
+        </section>
+
+        <!-- Action Thrillers Row -->
+        <section class="movie-row-container" id="action-section">
+            <div class="row-header">
+                <h2 class="row-title"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Action & Adventure</h2>
+                <p class="row-subtitle">Adrenaline-packed blockbusters and epic storylines.</p>
+            </div>
+            <div class="row-scroll-wrapper">
+                <div class="row-scroll-container" id="action-grid"></div>
+            </div>
+        </section>
+
+        <!-- Comedy Hits Row -->
+        <section class="movie-row-container" id="comedy-section">
+            <div class="row-header">
+                <h2 class="row-title"><i class="fa-solid fa-face-laugh-beam" style="color: #fbbf24;"></i> Comedy Hits</h2>
+                <p class="row-subtitle">Laugh-inducing stories and cinematic entertainment.</p>
+            </div>
+            <div class="row-scroll-wrapper">
+                <div class="row-scroll-container" id="comedy-grid"></div>
+            </div>
+        </section>
+
+        <!-- Watchlist Row -->
+        <section class="movie-row-container" id="watchlist-section">
+            <div class="row-header">
+                <h2 class="row-title"><i class="fa-solid fa-bookmark" style="color: var(--accent-red);"></i> Your Watchlist</h2>
+                <p class="row-subtitle">Your saved films stored directly in local cache storage.</p>
+            </div>
+            <div class="row-scroll-wrapper">
+                <div class="row-scroll-container" id="watchlist-grid"></div>
+                <div class="empty-state" id="watchlist-empty-state">
+                    <i class="fa-regular fa-bookmark"></i>
+                    <p>Your watchlist is currently empty. Bookmark movies to show them here!</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 CineMatch. Powered by FastAPI, TF-IDF NLP Vectorizer, and TMDB API.</p>
+            <p class="footer-note">College Minor Project - Machine Learning & Web Engineering</p>
+        </div>
+    </footer>
+
+    <!-- Details Modal -->
+    <div class="modal-backdrop" id="movie-detail-modal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="modal-close-btn" aria-label="Close modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="modal-body">
+                <div class="modal-poster-side">
+                    <div class="poster-container" id="modal-poster-container">
+                        <img id="modal-movie-poster" src="" alt="Movie Poster">
+                        <button class="play-trailer-btn" id="modal-play-trailer-btn" style="display: none;">
+                            <i class="fa-solid fa-play"></i> Watch Trailer
+                        </button>
+                    </div>
+                    <div class="video-container" id="modal-video-container" style="display: none;">
+                        <iframe id="modal-trailer-iframe" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    </div>
+                </div>
+                <div class="modal-info-side">
+                    <h2 class="modal-title" id="modal-movie-title">Movie Title</h2>
+                    <p class="modal-genres" id="modal-movie-genres">Sci-Fi, Adventure</p>
+                    <div class="modal-meta-row">
+                        <span class="modal-type-badge" id="modal-movie-type">Feature Film</span>
+                        <span class="modal-rating"><i class="fa-solid fa-star"></i> <span id="modal-movie-rating">8.2</span>/10</span>
+                        <span class="modal-year" id="modal-movie-year">2014</span>
+                        <span class="modal-runtime" id="modal-movie-runtime">169 mins</span>
+                    </div>
+
+                    <!-- Language Badge in Modal -->
+                    <div class="modal-language-row" id="modal-language-row">
+                        <span class="modal-lang-badge" id="modal-lang-badge">English</span>
+                        <span class="modal-origin-badge" id="modal-origin-badge">Hollywood</span>
+                    </div>
+
+                    <div class="modal-details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Director</span>
+                            <span class="detail-value" id="modal-movie-director">
+                                <a href="#" class="director-link" id="modal-director-link">Christopher Nolan</a>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Cast</span>
+                            <span class="detail-value" id="modal-movie-cast">Matthew McConaughey, Anne Hathaway</span>
+                        </div>
+                    </div>
+
+                    <!-- Web Series Info (Hidden by default, shown for series) -->
+                    <div class="modal-series-info" id="modal-series-info" style="display: none;">
+                        <h3 class="modal-section-title"><i class="fa-solid fa-tv"></i> Series Details</h3>
+                        <div class="series-seasons-grid" id="modal-seasons-grid">
+                            <!-- Season cards injected here -->
+                        </div>
+                    </div>
+
+                    <div class="modal-vibe-box" id="modal-movie-vibe-box">
+                        <div class="vibe-header">
+                            <span class="vibe-title"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Vibe Profile</span>
+                            <span class="vibe-percentage" id="modal-vibe-pct">94% Match</span>
+                        </div>
+                        <div class="vibe-tagline" id="modal-vibe-tagline">🌌 Mind-Bending Cosmic Journey</div>
+                        <div class="vibe-bar-container">
+                            <div class="vibe-bar-fill" id="modal-vibe-fill"></div>
+                        </div>
+                    </div>
+                    <div class="modal-overview-section">
+                        <h3 class="modal-section-title">Overview</h3>
+                        <p class="modal-overview-text" id="modal-movie-overview">Movie overview text...</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary btn-sm" id="modal-recommend-btn">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Recommend Similar
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="modal-watchlist-btn">
+                            <i class="fa-regular fa-bookmark"></i> Add to Watchlist
+                        </button>
+                        <button class="btn btn-director btn-sm" id="modal-director-search-btn">
+                            <i class="fa-solid fa-user-tie"></i> More by Director
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Director Search Modal -->
+    <div class="modal-backdrop" id="director-modal" style="display: none;">
+        <div class="director-modal-content">
+            <button class="modal-close-btn" id="director-modal-close" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="director-modal-header">
+                <i class="fa-solid fa-user-tie director-modal-icon"></i>
+                <h2>Search by Director</h2>
+                <p>Find all movies & series by your favorite filmmaker</p>
+            </div>
+            <div class="director-search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="director-name-input" placeholder="e.g. Christopher Nolan, S.S. Rajamouli..." autocomplete="off">
+            </div>
+            <div class="director-quick-picks">
+                <span class="quick-pick-label">Quick picks:</span>
+                <button class="director-chip" data-director="Christopher Nolan">Nolan</button>
+                <button class="director-chip" data-director="Steven Spielberg">Spielberg</button>
+                <button class="director-chip" data-director="James Cameron">Cameron</button>
+                <button class="director-chip" data-director="Rajkumar Hirani">Hirani</button>
+                <button class="director-chip" data-director="S.S. Rajamouli">Rajamouli</button>
+                <button class="director-chip" data-director="Anurag Kashyap">A. Kashyap</button>
+                <button class="director-chip" data-director="Ridley Scott">R. Scott</button>
+                <button class="director-chip" data-director="Martin Scorsese">Scorsese</button>
+            </div>
+            <button class="btn btn-primary" id="director-search-submit-btn" style="width: 100%; justify-content: center; margin-top: 0.5rem;">
+                <i class="fa-solid fa-search"></i> Search Director
+            </button>
+        </div>
+    </div>
+
+    <!-- Main JavaScript Logic -->
+    <script src="/static/main.js"></script>
+</body>
+</html>

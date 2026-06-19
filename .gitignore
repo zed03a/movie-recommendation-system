@@ -1,0 +1,29 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database
+*.db
+*.sqlite3
+
+# Large dataset CSV files (too large for GitHub)
+tmdb_5000_movies.csv
+tmdb_5000_credits.csv
+movies_cleaned.csv
+
+# Environment
+.env
+venv/
+env/
+.venv/
+
+# IDE / OS
+.idea/
+.vscode/
+*.DS_Store
+Thumbs.db
+
+# Logs
+*.log
